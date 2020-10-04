@@ -8,6 +8,7 @@
   <li>Store your credentials as parameter in the aws parameter store</li>
   <li>From your management console, switch to the Lambda panel</li>
   <li>Next, you are going to create a lambda function with the python runtime</li>
+  <li>Ensure that your Lambda role allows you access to parameter store</li>
   <li>Create a folder and install a python virtual environment in that folder with the code <code>python -m venv v-env</code></li>
   <li>Activate the virtual environment <code>$ source v-env/scripts/activate</code></li>
   <li>Install the tweepy and boto3 packages <code>pip install tweepy boto3</code></li>
