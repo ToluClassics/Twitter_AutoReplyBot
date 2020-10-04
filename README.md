@@ -1,4 +1,4 @@
-<h1>Twitter Bot to Reply Tweets using AWS Lambda and Tweepy</h1>
+<h1>Twitter Bot to Auto-Reply Tweets using AWS Lambda and Tweepy</h1>
 <p>Twitter Bot created to automatically reply posts with a custom message on twitter</p>
 
 <p>To replicate this app, follow the steps below:</p>
