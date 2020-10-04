@@ -3,7 +3,7 @@
 
 <p>To replicate this app, follow the steps below:</p>
 <ul>
-  <li><a href:"https://developer.twitter.com/en/apply-for-access">Create a twitter developer account here</a></li>
+  <li>Create a twitter developer account<a href:"https://developer.twitter.com/en/apply-for-access"> here</a></li>
   <li>Create an AWS account or if you have one sign in to your management console</li>
   <li>Store your credentials as parameter in the aws parameter store</li>
   <li>From your management console, switch to the Lambda panel</li>
