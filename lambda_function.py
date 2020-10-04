@@ -15,24 +15,15 @@ ssm = boto3.client('ssm')
 TEXT = os.environ.get('TEXT')
 HANDLES = os.environ.get('HANDLES')
 
-#this handles the authentication to the twitter streaming API
-class Authentication():
-  def __init__(self,CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET):
+#this class is used to streamline tweets to user timelines
+class TwitterClient():
+  def __init__(self,CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET,twitter_user=None,):
     self.CONSUMER_KEY = CONSUMER_KEY
     self.CONSUMER_SECRET = CONSUMER_SECRET
     self.ACCESS_TOKEN = ACCESS_TOKEN
     self.ACCESS_TOKEN_SECRET = ACCESS_TOKEN_SECRET
-
-  def authenticate(self):
-    auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-
-    return auth
-
-#this class is used to streamline tweets to user timelines
-class TwitterClient():
-  def __init__(self,twitter_user=None):
-    self.auth = Authentication(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET).authenticate()
+    
+    self.auth = Authentication(self.CONSUMER_KEY,self.CONSUMER_SECRET,self.ACCESS_TOKEN,self.ACCESS_TOKEN_SECRET).authenticate()
     self.twitter_client = API(self.auth)
     self.twitter_user = twitter_user
 
@@ -59,6 +50,21 @@ class TwitterClient():
       home_tweets.append(tweet)
     
     return home_tweets
+
+#this handles the authentication to the twitter streaming API
+class Authentication():
+  def __init__(self,CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET):
+    self.CONSUMER_KEY = CONSUMER_KEY
+    self.CONSUMER_SECRET = CONSUMER_SECRET
+    self.ACCESS_TOKEN = ACCESS_TOKEN
+    self.ACCESS_TOKEN_SECRET = ACCESS_TOKEN_SECRET
+
+  def authenticate(self):
+    auth = OAuthHandler(self.CONSUMER_KEY, self.CONSUMER_SECRET)
+    auth.set_access_token(self.ACCESS_TOKEN, self.ACCESS_TOKEN_SECRET)
+
+    return auth
+    
 
 class TwitterStreamer():
   """
@@ -104,12 +110,6 @@ class StdOutListener(StreamListener):
       return False
     print(status)
 
-#function to get variables from parameter store
-def get_parameter(param_name):
-    response = ssm.get_parameter(Name=param_name,WithDecryption=True)
-    credentials = response['Parameter']['Value']
-    return credentials
-
 def lambda_handler(event, context):
     
     #retrieve parameters
@@ -118,16 +118,15 @@ def lambda_handler(event, context):
     CONSUMER_SECRET = get_parameter('/TwitterBot/Consumer_Secret')
     CONSUMER_KEY = get_parameter('/TwitterBot/Consumer_key')
     
-    
     #authenticate tweepy
-    auth = Authentication(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET)
+    auth = Authentication(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET).authenticate()
     twitter_streamer = TwitterStreamer()
     twitterApi = API(auth)
     
     accounts = HANDLES.split(",")
     
     for account in accounts:
-      twitter_client = TwitterClient(account)
+      twitter_client = TwitterClient(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET,account)
       user_tweets=twitter_client.get_timeline_tweets(10)
       
       user_id = user_tweets[0].id
@@ -142,5 +141,11 @@ def lambda_handler(event, context):
         except:
           print("No New Tweet")
     
-    
+
+
+#function to get variables from parameter store
+def get_parameter(param_name):
+    response = ssm.get_parameter(Name=param_name,WithDecryption=True)
+    credentials = response['Parameter']['Value']
+    return credentials 
     
